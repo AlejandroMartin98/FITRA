@@ -1,0 +1,116 @@
+{% extends 'base_dashboard.html' %}
+
+{% block title %}Dashboard Personal{% endblock %}
+
+{% block content %}
+
+<!-- Primera fila de tarjetas -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <a href="{{ url_for('fondos.fondos') }}" class="card-link">
+            <div class="card text-white">
+                <div class="card-header bg-primary">Fondos Registrados</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ total_fondos }} fondos</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-md-4">
+        <a href="{{ url_for('movimientos.movimientos') }}" class="card-link">
+            <div class="card text-white">
+                <div class="card-header bg-success">Movimientos</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ total_movimientos }} movimientos</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-md-4">
+        <a href="{{ url_for('deudas.deudas') }}" class="card-link">
+            <div class="card text-white">
+                <div class="card-header bg-info">Deudas Activas</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ total_deudas }} deudas</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Segunda fila de tarjetas -->
+<div class="row mt-2">
+    <div class="col-md-4">
+        <a href="" class="card-link">
+            <div class="card text-white">
+                <div class="card-header bg-warning">Balance Total</div>
+                <div class="card-body">
+                    <h5 class="card-title">${{ "{:,.0f}".format(balance_total or 0).replace(",", ".") }}</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="" class="card-link">
+            <div class="card text-white">
+                <div class="card-header bg-dark">Indicadores</div>
+                <div class="card-body">
+                    <h5 class="card-title">${{ "{:,.0f}".format(ganancias_totales or 0).replace(",", ".") }}</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="" class="card-link">
+            <div class="card text-white">
+                <div class="card-header bg-secondary">Nuevo Movimiento</div>
+                <div class="card-body">
+                    <h5 class="card-title">Registrar</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Tabla de últimos movimientos -->
+{% if ultimos_movimientos and ultimos_movimientos|length > 0 %}
+<div class="card mt-4 movements-table-card">
+    <div class="card-header">
+        <h4>Últimos Movimientos</h4>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>Monto</th>
+                    <th>Tipo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for movimiento in ultimos_movimientos %}
+                <tr>
+                    <td>{{ movimiento.fecha }}</td>
+                    <td>{{ movimiento.concepto }}</td>
+                    <td>$ {{ "{:,.0f}".format(movimiento.monto or 0).replace(",", ".") }}</td>
+                    <td>
+                        {% if movimiento.tipo == 'ingreso' %}
+                        <span class="badge bg-success">Ingreso</span>
+                        {% else %}
+                        <span class="badge bg-danger">Egreso</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,344 @@
+/* dashboard.css */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: 	#0f172a;
+    color: #fff;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 70px;
+    height: 100%;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    padding-top: 1.5rem;
+    transition: width 0.3s ease;
+    overflow-x: hidden;
+    z-index: 1000;
+}
+
+.sidebar:hover {
+    width: 250px;
+}
+
+.sidebar h2,
+.sidebar a span {
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar:hover h2,
+.sidebar:hover a span {
+    opacity: 1;
+}
+
+.sidebar h2 {
+    color: #fff;
+    margin: 0 1rem 2rem 1rem;
+    font-size: 1.2rem;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    color: #fff;
+    text-decoration: none;
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    transition: background-color 0.2s;
+}
+
+.sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.sidebar a i {
+    margin-right: 1rem;
+    font-size: 1.2rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+.main-content {
+    margin-left: 70px;
+    padding: 2rem;
+    transition: margin-left 0.3s ease;
+}
+
+.sidebar:hover ~ .main-content {
+    margin-left: 250px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.header h1 {
+    color: #fff;
+}
+
+.logout-btn {
+    background-color: #7289da;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #5b6eae;
+}
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ccc;
+    object-fit: cover;
+    margin-right: 1rem;
+}
+
+/* Override Bootstrap card styles for dark theme */
+/* Estilo para hacer las tarjetas clickeables */
+.card-link {
+    text-decoration: none;
+    display: block;
+    color: inherit;
+    cursor: pointer;
+}
+
+.card-link:hover .card {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+.card {
+    background: #27292d;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.card-header {
+    background-color: #1e2124;
+    border-bottom: 1px solid #36393f;
+    border-radius: 15px 15px 0 0 !important;
+    color: #fff;
+    font-weight: 600;
+}
+
+.card-body {
+    background-color: #273447;
+    border-radius: 0 0 15px 15px;
+}
+
+.btn-light {
+    background-color: #4f545c;
+    border: none;
+    color: #fff;
+}
+
+.btn-light:hover {
+    background-color: #686d73;
+    color: #fff;
+}
+
+/* Table styling for dark theme */
+.table {
+    color: #dcddde;
+}
+
+.table thead th {
+    border-color: #36393f;
+    color: #b9bbbe;
+    background-color: #222529;
+}
+
+.table tbody td {
+    border-color: #36393f;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #27292d;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #2e3035;
+}
+
+.badge {
+    padding: 0.35em 0.65em;
+}
+
+/* Override specific bootstrap colors for cards */
+.bg-primary {
+    background-color: #5865f2 !important;
+}
+
+.bg-success {
+    background-color: #22c55e !important;
+}
+
+.bg-info {
+    background-color: #3498db !important;
+}
+
+.bg-warning {
+    background-color: #f1c40f !important;
+    color: #1e2124 !important;
+}
+
+.bg-dark {
+    background-color: #1e2124 !important;
+}
+
+.bg-secondary {
+    background-color: #4f545c !important;
+}
+
+.bg-light {
+    background-color: #2e3035 !important;
+    color: #fff !important;
+}
+
+/* Badge colors */
+.badge.bg-success {
+    background-color: #22c55e!important;
+}
+
+.badge.bg-danger {
+    background-color: #ef4444 !important;
+}
+
+/* Movements table card styling */
+.movements-table-card {
+    background-color: #222529;
+}
+
+.movements-table-card .card-header {
+    background-color: #1a1c1f;
+}
+
+.movements-table-card .card-body {
+    background-color: #222529;
+    padding: 0.5rem;
+}
+
+/* Empty state message */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #b9bbbe;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #4f545c;
+}
+/* tarjeta de fondo_detail, modal eliminacion */
+.mb-3{
+    color: #ffff;
+}
+/* Media queries for better responsive design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 0.5rem;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        overflow-x: auto;
+    }
+
+    .sidebar h2 {
+        display: none;
+    }
+
+    .sidebar a {
+        margin: 0;
+        padding: 0.5rem;
+        flex-direction: column;
+        text-align: center;
+        font-size: 0.8rem;
+    }
+
+    .sidebar a i {
+        margin-right: 0;
+        margin-bottom: 0.3rem;
+    }
+
+    .sidebar a span {
+        opacity: 1;
+        font-size: 0.7rem;
+    }
+
+    .sidebar:hover {
+        width: 100%;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding-top: 0.5rem;
+    }
+
+    .sidebar:hover ~ .main-content {
+        margin-left: 0;
+    }
+}
+/* Badges personalizados */
+.badge {
+    font-size: 0.9rem;
+    padding: 0.5em 0.7em;
+    border-radius: 0.7rem;
+}
+#loadingSpinner {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ESTILO PARA  LA IMAGEN DE PERFIL*/
+.d-flex >.fa-user {
+    width: 50px;  /* Tamaño del ícono */
+    height: 50px; /* Tamaño del ícono */
+    border-radius: 50%; /* Redondeado para un efecto de círculo */
+    background-color: #7289da; /* Fondo azul Discord */
+    color: white;  /* Color blanco para el ícono */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px; /* Tamaño del ícono */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
+    border: 2px solid #4e73df; /* Borde azul más oscuro */
+    margin-right: 15px;
+}
+
+/* estilo vibracion mensaje de nuevo saldo al hacer movmientos*/
+@keyframes vibrar {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(5px); }
+  }
+  
+  .vibrar {
+    animation: vibrar 0.5s ease-in-out;
+  }
+  

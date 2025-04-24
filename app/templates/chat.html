@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+        body {
+            background-color: #202225;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #chat-box {
+            flex: 1;
+            overflow-y: scroll;
+            padding: 1rem;
+            border-bottom: 1px solid #444;
+        }
+        #chat-box div {
+            margin-bottom: 0.5rem;
+        }
+        #message-form {
+            display: flex;
+            padding: 1rem;
+            background-color: #2f3136;
+        }
+        #message-input {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: none;
+            margin-right: 0.5rem;
+        }
+        button {
+            background: #7289da;
+            border: none;
+            padding: 0.5rem 1rem;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-box"></div>
+    <form id="message-form">
+        <input id="message-input" placeholder="Escribe un mensaje..." autocomplete="off" />
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script>
+        const socket = io();
+        const chatBox = document.getElementById('chat-box');
+        const form = document.getElementById('message-form');w
+        const input = document.getElementById('message-input');
+
+        socket.on('connect', () => {
+            console.log('Conectado al servidor');
+        });
+
+        socket.on('message', (data) => {
+            const div = document.createElement('div');
+            div.textContent = data;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = input.value.trim();
+            if (message) {
+                socket.emit('message', `{{ username }}: ${message}`);
+                input.value = '';
+            }
+        });
+    </script>
+</body>
+</html>

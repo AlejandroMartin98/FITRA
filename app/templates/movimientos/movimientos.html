@@ -1,0 +1,222 @@
+{% extends 'base_dashboard.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-white">Movimientos</h1>
+
+    <!-- Botón para abrir el modal -->
+    <button id="btnNuevoMovimiento" class="btn btn-success" type="button">
+        + Nuevo Movimiento
+    </button>
+    {% if movimientos|length > 0 %}
+    <div class="card bg-dark shadow-lg mt-4">
+        <div class="card-body">
+            <h2 class="card-title text-white mb-4">Movimientos</h2>
+            <table class="table table-dark table-striped table-hover table-bordered align-middle text-center">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>.
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Fondo</th>
+                    </tr>
+                </thead>
+                <tbody id="movimientosTable">
+                    <tbody id="movimientosTable">
+                        {% for movimiento in movimientos %}
+                        <tr class="text-center">
+                            <td>{{ movimiento.fecha }}</td>
+                            <td>
+                                {% if movimiento.tipo == 'ingreso' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-arrow-down"></i> Ingreso
+                                    </span>
+                                {% elif movimiento.tipo == 'egreso' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-arrow-up"></i> Egreso
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ movimiento.descripcion }}</td>
+                            <td class="fw-bold {% if movimiento.tipo == 'ingreso' %}text-success{% elif movimiento.tipo == 'egreso' %}text-danger{% endif %}">
+                                {% if movimiento.tipo == 'ingreso' %}
+                                    <i class="fas fa-coins"></i>
+                                {% elif movimiento.tipo == 'egreso' %}
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                {% endif %}
+                                ${{ "{:,.2f}".format(movimiento.monto) }}
+                            </td>
+                            <td>{{ movimiento.fondo_nombre }}</td>
+                        </tr>
+                        {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+        {% else %}
+        <div class="empty-state text-center mt-5 p-4" style="background-color: #cbd5e1; border-radius: 10px; color: #ccc;">
+            <i class="fas fa-exchange-alt fa-4x mb-3" style="color: #7289da;"></i>
+            <h4>No hay movimientos registrados todavía.</h4>
+            <p class="lead">Empieza agregando un nuevo movimiento usando el botón de arriba.</p>
+        </div>
+        {% endif %}
+    </table>
+</div>
+
+<!-- Modal para agregar nuevo movimiento -->
+<div class="modal fade" id="movimientoModal" tabindex="-1" aria-labelledby="movimientoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="movimientoModalLabel">Nuevo Movimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="movimientoForm">
+                    <div class="mb-3">
+                        <label for="fecha" class="form-label">Fecha</label>
+                        <input type="date" class="form-control bg-dark text-white" id="fecha" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Tipo</label>
+                        <select class="form-select bg-dark text-white" id="tipo" required>
+                            <option value="">Seleccionar</option>
+                            <option value="ingreso" class="bg-success text-white">Ingreso</option>
+                            <option value="egreso" class="bg-warning text-dark">Egreso</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <input type="text" class="form-control bg-dark text-white" id="descripcion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="monto" class="form-label">Monto</label>
+                        <input type="number" class="form-control bg-dark text-white" id="monto" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fondo_id" class="form-label">Fondo</label>
+                        <select class="form-select bg-dark text-white" id="fondo_id" required>
+                            <option value="">Seleccionar Fondo</option>
+                            {% for fondo in fondos %}
+                                <option value="{{ fondo.id }}">{{ fondo.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-info w-100">Registrar Movimiento</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('btnNuevoMovimiento').addEventListener('click', function (e) {
+    e.preventDefault();  // Evitar comportamiento normal del botón
+
+    const fondosDisponibles = {{ fondos|length }};
+    if (fondosDisponibles === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No tienes fondos creados',
+            text: 'Primero debes crear un fondo desde el cual realizar movimientos.',
+            background: '#2f3136',
+            color: '#fff',
+            confirmButtonText: 'Crear fondo',
+            confirmButtonColor: '#5865F2',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ url_for('fondos.fondos') }}";
+            }
+        });
+    } else {
+        let modal = new bootstrap.Modal(document.getElementById('movimientoModal'));
+        modal.show();
+    }
+});
+document.getElementById("movimientoForm").addEventListener("submit", function(e) {
+    e.preventDefault();  // Prevenir submit tradicional
+
+    const fecha = document.getElementById("fecha").value;
+    const tipo = document.getElementById("tipo").value;
+    const descripcion = document.getElementById("descripcion").value;
+    const monto = parseFloat(document.getElementById("monto").value);
+    const fondo_id = document.getElementById("fondo_id").value;
+
+    if (!fecha || !tipo || !descripcion || !monto || !fondo_id) {
+        Swal.fire({
+            icon: 'error',
+            title: '¡Faltan datos!',
+            text: 'Por favor, complete toda la información del movimiento.',
+            background: '#1f1f1f',
+            color: 'white',
+            confirmButtonColor: '#4e73df'
+        });
+        return;
+    }
+
+    // Enviar datos al servidor
+    fetch("{{ url_for('movimientos.agregar_movimiento_ajax') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            fecha: fecha,
+            tipo: tipo,
+            descripcion: descripcion,
+            monto: monto,
+            fondo_id: fondo_id
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.fondo_suficiente === false) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Fondos Insuficientes!',
+                    text: 'No hay suficientes fondos para realizar este movimiento.',
+                    background: '#1f1f1f',
+                    color: 'white',
+                    confirmButtonColor: '#4e73df'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Movimiento Registrado!',
+                    html: `<p>${data.message}</p><p><strong>Nuevo saldo:</strong> $${parseFloat(data.nuevo_saldo).toLocaleString()}</p>`,
+                    background: '#1f1f1f',
+                    color: 'white',
+                    confirmButtonColor: '#4e73df'
+                }).then(() => {
+                    window.location.href = "{{ url_for('movimientos.movimientos') }}";
+                });
+
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: '¡Error!',
+                text: data.message,
+                background: '#1f1f1f',
+                color: 'white',
+                confirmButtonColor: '#4e73df'
+            });
+        }
+    })
+    .catch(err => {
+        Swal.fire({
+            icon: 'error',
+            title: '¡Error!',
+            text: 'Hubo un problema al registrar el movimiento.',
+            background: '#1f1f1f',
+            color: 'white',
+            confirmButtonColor: '#4e73df'
+        });
+    });
+});
+
+</script>
+{% endblock %}
+
+

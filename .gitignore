@@ -1,0 +1,11 @@
+# Ignorar archivos específicos
+.env
+.structure.txt
+about.txt
+
+# Otros comunes que podrías tener ya
+__pycache__/
+*.pyc
+*.db
+instance/
+.env.*
