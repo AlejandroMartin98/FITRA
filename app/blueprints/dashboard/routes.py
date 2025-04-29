@@ -19,26 +19,39 @@ def show_dashboard():
         return render_template('index.html')
 
     # 2) Conéctate a la BD del usuario
-    conn = get_connection_for_user(username)
+    try:
+        conn = get_connection_for_user(username)
+        
+        # Verifica si la conexión es None
+        if conn is None:
+            flash('No se pudo conectar a tu base de datos. Por favor, contacta con soporte.', 'danger')
+            # Cerrar la sesión del usuario y enviarlo al login
+            flash('Hubo un problema con tu base de datos. Por favor intenta más tarde.', 'danger')
+            return redirect(url_for('auth.index'))
 
-    # 3) Consulta tus métricas
-    with conn.cursor() as cur:
-        cur.execute("SELECT COUNT(*) AS total FROM FONDOS")
-        total_fondos = cur.fetchone()['total']
+        
+        # 3) Consulta tus métricas
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) AS total FROM FONDOS")
+            total_fondos = cur.fetchone()['total']
 
-        cur.execute("SELECT COUNT(*) AS total FROM MOVIMIENTOS")
-        total_movimientos = cur.fetchone()['total']
+            cur.execute("SELECT COUNT(*) AS total FROM MOVIMIENTOS")
+            total_movimientos = cur.fetchone()['total']
 
-        cur.execute("SELECT COUNT(*) AS total FROM DEUDAS")
-        total_deudas = cur.fetchone()['total']
-    conn.close()
+            cur.execute("SELECT COUNT(*) AS total FROM DEUDAS")
+            total_deudas = cur.fetchone()['total']
+        conn.close()
 
-    # 4) Renderiza
-    return render_template('dashboard.html',
-                           total_fondos=total_fondos,
-                           total_movimientos=total_movimientos,
-                           total_deudas=total_deudas,
-                           username=username)
-
+        # 4) Renderiza
+        return render_template('dashboard.html',
+                              total_fondos=total_fondos,
+                              total_movimientos=total_movimientos,
+                              total_deudas=total_deudas,
+                              username=username)
+                              
+    except Exception as e:
+        flash(f'Ocurrió un error al acceder a tus datos.', 'danger')
+        session.clear()
+        return redirect(url_for('auth.index'))
 
 

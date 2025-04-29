@@ -5,6 +5,18 @@ body {
     background-color: 	#0f172a;
     color: #fff;
 }
+/* ELIMINAR DECORACION DE INPUT NUMBRE para incrementar numeros osease las flechas*/
+/* Quitar flechas en Chrome, Safari, Edge, Opera */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Quitar flechas en Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
 
 .sidebar {
     position: fixed;
@@ -249,6 +261,55 @@ body {
 /* tarjeta de fondo_detail, modal eliminacion */
 .mb-3{
     color: #ffff;
+}
+/* Inputs del formulario */
+.modal-content .form-control {
+    background-color: #1e2735;
+    border: 1px solid #202225;
+    color: #dcddde;
+    border-radius: 8px;
+    transition: border-color 0.2s ease;
+}
+
+.modal-content .form-control:focus,
+.modal-content .form-control:-webkit-autofill,
+.modal-content .form-control:-webkit-autofill:focus,
+.modal-content .form-control:-webkit-autofill:hover {
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
+    outline: none;
+    color: #00ebd2;
+    border-color: #02aef0;
+    background-color: #1e2735;
+    box-shadow: 0 0 0px 1000px #202225 inset !important;
+    -webkit-text-fill-color: #00ebd2 !important;
+    border: 1px solid #02aef0 !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Etiquetas del formulario */
+.modal-content .form-label {
+    color: #b9bbbe;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Botón de cerrar */
+.btn-close-white {
+    filter: invert(1);
+}
+
+/* Botón de enviar */
+.modal-footer .btn-success {
+    background-color: #3ba55d;
+    border-color: #3ba55d;
+    font-weight: bold;
+}
+
+.modal-footer .btn-success:hover {
+    background-color: #2d7d47;
+    border-color: #2d7d47;
 }
 /* Media queries for better responsive design */
 @media (max-width: 768px) {

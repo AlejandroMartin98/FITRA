@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Iniciar Sesión</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         * {
             box-sizing: border-box;
@@ -61,10 +63,18 @@
             transition: border-color 0.2s ease;
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active  {
             outline: none;
             border-color: #7289da;
             box-shadow: 0 0 0 2px rgba(114, 137, 218, 0.3);
+            background-color: #202225; /* Mantener el fondo oscuro */
+            color: #00ebd2; /* Mantener el texto blanco */
+            -webkit-box-shadow: 0 0 0 1000px #202225 inset !important;
+            -webkit-text-fill-color: #00ebd2 !important;
         }
 
         .btn-login {
@@ -95,42 +105,134 @@
             color: #3b82f6;
             text-decoration: none;
         }
-
-        .flash {
-            background-color: rgba(114, 137, 218, 0.1);
-            color: #b91c1c;
-            padding: 0.8rem 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            text-align: center;
-            border: 1px solid rgba(114, 137, 218, 0.3);
-        }
     </style>
 </head>
 <body>
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        
+        <form id="loginForm" method="POST" action="{{ url_for('auth.login') }}">
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
 
-<div class="login-container">
-    <h2>Iniciar Sesión</h2>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" required>
+            </div>
 
+            <button type="submit" class="btn-login">Ingresar</button>
+        </form>
 
-    <form method="POST" action="{{ url_for('auth.login') }}">
-        <div class="form-group">
-            <label for="username">Usuario</label>
-            <input type="text" id="username" name="username" required autofocus>
+        <div class="message">
+            ¿No tienes cuenta? <a href="{{ url_for('auth.registro') }}">Regístrate</a>
         </div>
-
-        <div class="form-group">
-            <label for="password">Contraseña</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-
-        <button type="submit" class="btn-login">Ingresar</button>
-    </form>
-
-    <div class="message">
-        ¿No tienes cuenta? <a href="{{ url_for('auth.registro') }}">Regístrate</a>
     </div>
-</div>
 
+    <!-- jQuery (opcional pero útil) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Mostrar mensajes flash con SweetAlert -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <script>
+                {% for category, message in messages %}
+                    Swal.fire({
+                        title: '{{ "Éxito" if category == "success" else "Error" }}',
+                        text: '{{ message }}',
+                        icon: '{{ category }}',
+                        confirmButtonText: 'OK'
+                    });
+                {% endfor %}
+            </script>
+        {% endif %}
+    {% endwith %}
+
+    <script>
+        $(document).ready(function() {
+    $('#loginForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            dataType: 'json',  // Especificar que esperamos JSON
+            success: function(response) {
+                if (response.success) {
+                    // Si es exitoso
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: response.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        background: '#1f1f1f',
+                        color: 'white',
+                        confirmButtonColor: '#4e73df',
+                        timer: 1500,
+                        timerProgressBar: true
+                    }).then(() => {
+                        if (response.redirect) {
+                            window.location.href = response.redirect;
+                        }
+                    });
+                } else {
+                    // Si hay un error pero la respuesta es 200 OK
+                    Swal.fire({
+                        title: 'Aviso',
+                        text: response.message,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        background: '#1f1f1f',
+                        color: 'white',
+                        confirmButtonColor: '#4e73df',
+                        timer: 1500,
+                        timerProgressBar: true
+                    }).then(() => {
+                        if (response.redirect) {
+                            window.location.href = response.redirect;
+                        }
+                    });
+                }
+            },
+            error: function(xhr) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.message || 'Credenciales incorrectas',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        background: '#1f1f1f',
+                        color: 'white',
+                        confirmButtonColor: '#4e73df',
+                        timer: 1500,
+                        timerProgressBar: true
+                    }).then(() => {
+                        if (response.redirect) {
+                            window.location.href = response.redirect;
+                        }
+                    });
+                } catch (e) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error en el servidor',
+                        icon: 'error',
+                        confirmButtonText: null,
+                        background: '#1f1f1f',
+                        color: 'white',
+                        confirmButtonColor: '#4e73df',
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                }
+            }
+        });
+    });
+});
+    </script>
 </body>
 </html>

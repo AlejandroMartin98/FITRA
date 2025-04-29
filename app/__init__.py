@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template 
 from dotenv import load_dotenv
 import os
 from flask_socketio import SocketIO
@@ -24,6 +24,10 @@ def create_app():
     app.register_blueprint(fondos_bp)
     app.register_blueprint(movimientos_bp)
     app.register_blueprint(deudas_bp)
+    @app.route('/')   # 👈 Aquí definimos la ruta principal
+    def index():
+        return render_template('index.html')  # 👈 archivo de inicio
+
     socketio.init_app(app)
     
     return app

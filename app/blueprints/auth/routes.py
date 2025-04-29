@@ -1,27 +1,22 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app as app
-from app.db import get_main_connection, create_user_database, create_default_tables_for_user, get_connection_for_user
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Blueprint, jsonify, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import check_password_hash, generate_password_hash
+from app.db import get_main_connection, get_connection_for_user
 import datetime
-import sys
+import re
 
-auth_bp = Blueprint('auth', __name__)  # sin template_folder
-
-@auth_bp.route('/')
-def index():
-    # Si NO hay user_id en sesión, mostramos el landing (index.html)
-    if 'user_id' not in session:
-        app.logger.info("No hay sesión de usuario, mostrando el landing")
-        return render_template('index.html')
-    
-    app.logger.info("Usuario logueado, redirigiendo al dashboard")
-    return redirect(url_for('dashboard.show_dashboard'))
-
+auth_bp = Blueprint('auth', __name__, template_folder='templates')
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if not username or not password:
+            return jsonify({
+                "success": False,
+                "message": "Usuario y contraseña son requeridos"
+            })
 
         try:
             conn = get_main_connection()
@@ -29,20 +24,37 @@ def login():
                 cursor.execute("SELECT * FROM usuarios WHERE USERNAME = %s", (username,))
                 usuario = cursor.fetchone()
 
-            if usuario and check_password_hash(usuario['PASSWORD'], password):
+            if not usuario:
+                return jsonify({
+                    "success": False,
+                    "message": "Usuario no encontrado. ¿Deseas registrarte?",
+                    "redirect": url_for('auth.registro')  
+                })
+
+            if check_password_hash(usuario['PASSWORD'], password):
                 session['user_id'] = usuario['ID']
-                session['username'] = usuario['USERNAME']  # 👈 NECESARIO PARA USAR SU DB
+                session['username'] = usuario['USERNAME']
                 session['nombre'] = usuario['NOMBRE']
-                return redirect(url_for('dashboard.show_dashboard'))
+                return jsonify({
+                    "success": True,
+                    "message": "Inicio de sesión exitoso",
+                    "redirect": url_for('dashboard.show_dashboard')
+                })
             else:
-                flash('Credenciales incorrectas')
+                return jsonify({
+                    "success": False,
+                    "message": "Credenciales incorrectas"
+                })
 
         except Exception as e:
-            app.logger.error(f"Error en login: {e}")
-            flash('Error en el inicio de sesión')
-    
-    return render_template('login.html')
+            print("Error en login:", e)
+            return jsonify({
+                "success": False,
+                "message": "Error interno del servidor",
+                "redirect": url_for('auth.login') 
+            })
 
+    return render_template('login.html')
 
 
 @auth_bp.route('/registro', methods=['GET', 'POST'])
@@ -59,10 +71,13 @@ def registro():
         estado = "activo"
         rol_id = 1  # por defecto
 
-        import re
+         # Validación del nombre de usuario
         if not re.fullmatch(r'[A-Za-z0-9]+', username):
-            flash("El nombre de usuario solo puede contener letras y números (sin espacios ni símbolos).", "warning")
-            return render_template('registro.html')
+            return jsonify({
+                "success": False,
+                "message": "El nombre de usuario solo puede contener letras y números (sin espacios ni símbolos).",
+                "redirect": url_for('registro')
+            }), 
 
         try:
             from app.db import get_main_connection
@@ -71,20 +86,28 @@ def registro():
                 # Verificar si ya existe el username
                 cursor.execute("SELECT * FROM usuarios WHERE USERNAME = %s", (username,))
                 if cursor.fetchone():
-                    flash("El nombre de usuario ya está en uso. Elige otro.", "warning")
-                    return render_template('registro.html')
+                     return jsonify({
+                        "success": False,
+                        "message": "El nombre de usuario ya está en uso. Elige otro.",
+                        "redirect": url_for('registro')
+                    }), 
 
                 # Verificar si ya existe el email
                 cursor.execute("SELECT * FROM usuarios WHERE EMAIL = %s", (email,))
                 if cursor.fetchone():
-                    flash("El correo electrónico ya está registrado.", "warning")
-                    return render_template('registro.html')
+                    return jsonify({
+                        "success": False,
+                        "message": "El correo electrónico ya está registrado.",
+                        "redirect": url_for('registro')
+                    }), 
                 # Verificar si ya existe la base de datos
                 cursor.execute("SHOW DATABASES LIKE %s", (f"db_{username}",))
                 if cursor.fetchone():
-                    flash("Ya existe una cuenta con ese nombre de usuario (base de datos existente). Intenta con otro.", "warning")
-                    return render_template('registro.html')
-                
+                    return jsonify({
+                        "success": False,
+                        "message": "Ya existe una cuenta con ese nombre de usuario (base de datos existente). Intenta con otro.",
+                        "redirect": url_for('registro')
+                    }), 
                 # Insertar nuevo usuario
                 cursor.execute("""
                     INSERT INTO usuarios (NOMBRE, APELLIDO, FECHA_CUMPLE, EMAIL, USERNAME, PASSWORD, FECHA_REGISTRO, ULTIMO_LOGIN, ESTADO, ROL_ID)
@@ -147,13 +170,19 @@ def registro():
 
                 user_db_connection.commit()
 
-            flash("Registro exitoso. Ahora puedes iniciar sesión.", "success")
-            return redirect(url_for('auth.login'))
+            return jsonify({
+                "success": True,
+                "message": "Registro exitoso. Ahora puedes iniciar sesión.",
+                "redirect": url_for('login')
+            }), 
 
         except Exception as e:
             print(f"Error al registrar: {e}")
-            flash("Ocurrió un error durante el registro.", "danger")
-            return redirect(url_for('auth.registro'))
+            return jsonify({
+                "success": False,
+                "message": "Ocurrió un error durante el registro.",
+                "redirect": url_for('registro')
+            }), 
 
     return render_template('registro.html')
 
@@ -162,5 +191,9 @@ def registro():
 @auth_bp.route('/logout')
 def logout():
     session.clear()
-    flash("Sesión cerrada", "info")
-    return redirect(url_for('auth.login'))
+    print("Sesión cerrada")
+    return jsonify({
+        "success": True,
+        "message": "Sesión cerrada con exito",
+        "redirect": url_for('index')
+    })

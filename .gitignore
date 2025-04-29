@@ -2,6 +2,8 @@
 .env
 .structure.txt
 about.txt
+ngrok.exe
+diseño_esquema_relacional
 
 # Otros comunes que podrías tener ya
 __pycache__/
